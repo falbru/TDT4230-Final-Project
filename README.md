@@ -1,15 +1,19 @@
-# TDT4230 - Graphics and Visualization
+# TDT4230 Final Project
 
-This is the base code for the NTNU subject TDT4230 assignments. It may also be used for the final project, which we will showcase [here](https://www.idi.ntnu.no/grupper/vis/teaching/)
+My final project in TDT4230
 
-## What do i do?
+## Installation
 
-	git clone --recursive https://github.com/bartvbl/TDT4230-Assignment-1.git
+Clone the repository with all required submodules:
 
-Should you forget the `--recursive` bit, just run:
+	git clone --recursive https://github.com/falbru/TDT4230-Final-Project.git
+
+If you forgot the `--recursive` flag, you can initialize the submodules afterward:
 
 	git submodule update --init
 
+
+## Setup
 
 ### Windows
 
@@ -18,14 +22,8 @@ You may use CMake-gui or the command-line cmake to generate a Visual Studio solu
 
 ### Linux:
 
-Make sure you have a C/C++ compiler such as  GCC, CMake and Git.
+Make sure you have Git, CMake, and a C/C++ compiler such as GCC.
+
+Run the command:
 
 	make run
-
-which is equivalent to
-
-	git submodule update --init
-	cd build
-	cmake ..
-	make
-	./glowbox
