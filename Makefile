@@ -9,22 +9,22 @@ help:
 
 .PHONY: run run-with-music run-debug
 run: build
-	cd build && ./glowbox
+	cd build && ./tdt4230
 run-with-music: build
-	cd build && ./glowbox --enable-music
+	cd build && ./tdt4230 --enable-music
 run-debug: build-debug | has-gdb
-	cd build-debug && gdb -batch $(GDB_OPTS) -ex "run" -ex "backtrace" ./glowbox
+	cd build-debug && gdb -batch $(GDB_OPTS) -ex "run" -ex "backtrace" ./tdt4230
 
 .PHONY: build
-build: build/glowbox
-build/glowbox: ${SOURCES} | build/Makefile has-make
+build: build/tdt4230
+build/tdt4230: ${SOURCES} | build/Makefile has-make
 	make -C build $(MAKE_OPTS)
 build/Makefile: | build/ _submodules has-cmake
 	cd build && cmake ..
 
 .PHONY: build-debug
-build-debug: build-debug/glowbox
-build-debug/glowbox: ${SOURCES} | build-debug/Makefile has-make
+build-debug: build-debug/tdt4230
+build-debug/tdt4230: ${SOURCES} | build-debug/Makefile has-make
 	make -C build-debug $(MAKE_OPTS)
 build-debug/Makefile: | build-debug/ _submodules has-cmake
 	cd build-debug && cmake -DCMAKE_BUILD_TYPE=Debug ..
