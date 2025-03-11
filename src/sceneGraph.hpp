@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <vector>
 
-enum SceneNodeType { GEOMETRY, POINT_LIGHT, SPOT_LIGHT };
+enum SceneNodeType { GEOMETRY };
 
 struct SceneNode {
   SceneNode() {
