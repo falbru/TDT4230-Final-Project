@@ -1,5 +1,6 @@
 #include "gamelogic.h"
 #include "sceneGraph.hpp"
+#include "utilities/camera.hpp"
 #include <GLFW/glfw3.h>
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
@@ -16,6 +17,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 
+Gloom::Camera *camera;
+
 SceneNode *rootNode;
 SceneNode *planetNode;
 
@@ -23,8 +26,28 @@ Gloom::Shader *shader;
 
 CommandLineOptions options;
 
+void cursorPosCallback(GLFWwindow *window, double x, double y) {
+  int windowWidth, windowHeight;
+  glfwGetWindowSize(window, &windowWidth, &windowHeight);
+  glViewport(0, 0, windowWidth, windowHeight);
+
+  camera->handleCursorPosInput(x, y);
+}
+
+void mouseButtonCallback(GLFWwindow *, int button, int action, int) {
+  camera->handleMouseButtonInputs(button, action);
+}
+
+void keyCallback(GLFWwindow *, int key, int, int action, int) {
+  camera->handleKeyboardInputs(key, action);
+}
+
 void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+  glfwSetCursorPosCallback(window, cursorPosCallback);
+  glfwSetMouseButtonCallback(window, mouseButtonCallback);
+  glfwSetKeyCallback(window, keyCallback);
 
   shader = new Gloom::Shader();
   shader->makeBasicShader("../res/shaders/simple.vert",
@@ -33,6 +56,8 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
 
   Mesh planetMesh = generateSphere(1.0, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
+
+  camera = new Gloom::Camera(glm::vec3(0, 0, -10));
 
   // Construct scene
   rootNode = createSceneNode();
@@ -49,17 +74,15 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
 void updateFrame(GLFWwindow *window) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  getTimeDeltaSeconds();
+  double deltaTime = getTimeDeltaSeconds();
 
   glm::mat4 projection =
       glm::perspective(glm::radians(80.0f),
                        float(windowWidth) / float(windowHeight), 0.1f, 350.f);
 
-  glm::vec3 cameraPosition = glm::vec3(0, 0, 10);
+  camera->updateCamera(deltaTime);
 
-  glm::mat4 cameraTransform = glm::translate(-cameraPosition);
-
-  glm::mat4 VP = projection * cameraTransform;
+  glm::mat4 VP = projection * camera->getViewMatrix();
 
   updateNodeTransformations(rootNode, VP);
 }
