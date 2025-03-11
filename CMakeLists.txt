@@ -2,7 +2,7 @@
 # Specify minimum CMake version and project name
 #
 cmake_minimum_required(VERSION 3.6)
-project (glowbox)
+project (tdt4230)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # nice for language servers
 
 #
@@ -132,4 +132,4 @@ target_link_libraries (${PROJECT_NAME}
                        fmt::fmt
                        ${GLFW_LIBRARIES}
                        ${GLAD_LIBRARIES})
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT glowbox)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT tdt4230)
