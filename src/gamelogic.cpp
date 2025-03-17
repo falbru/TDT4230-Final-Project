@@ -57,8 +57,6 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   Mesh planetMesh = generateSphere(1.0, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
 
-  camera = new Gloom::Camera(glm::vec3(0, 0, -10));
-
   // Construct scene
   rootNode = createSceneNode();
   planetNode = createSceneNode();
@@ -67,6 +65,9 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
 
   planetNode->vertexArrayObjectID = planetVAO;
   planetNode->VAOIndexCount = planetMesh.indices.size();
+
+  camera = new Gloom::Camera(glm::vec3(0, 0, -10));
+  camera->lookAt(planetNode->position);
 
   getTimeDeltaSeconds();
 }

@@ -18,6 +18,8 @@ public:
     cMovementSpeed = movementSpeed;
     cMouseSensitivity = mouseSensitivity;
 
+    cQuaternion = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
     // Set up the initial view matrix
     updateViewMatrix();
   }
@@ -110,6 +112,34 @@ public:
 
     // Update the view matrix based on the new information
     updateViewMatrix();
+  }
+
+  void lookAt(const glm::vec3 &target) {
+    // Calculate direction vector
+    glm::vec3 direction = glm::normalize(cPosition - target);
+
+    // Calculate the right vector (using world up as reference)
+    glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 right = glm::normalize(glm::cross(worldUp, direction));
+
+    // Calculate the up vector for the camera
+    glm::vec3 up = glm::cross(direction, right);
+
+    // Create a look-at matrix
+    matView = glm::lookAt(cPosition, target, up);
+
+    // Extract the camera quaternion from the view matrix
+    glm::mat3 rotationMatrix(matView);
+    cQuaternion = glm::quat_cast(rotationMatrix);
+
+    // Reset pitch and yaw since we've directly set the orientation
+    fPitch = 0.0f;
+    fYaw = 0.0f;
+  }
+
+  /* Get the camera's forward direction vector */
+  glm::vec3 getForwardVector() {
+    return -glm::vec3(matView[0][2], matView[1][2], matView[2][2]);
   }
 
 private:
