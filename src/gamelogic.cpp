@@ -21,6 +21,8 @@ Gloom::Camera *camera;
 
 SceneNode *rootNode;
 SceneNode *planetNode;
+float planetRadius = 1.0;
+float atmosphereRadius = 1.25;
 
 Gloom::Shader *shader;
 
@@ -56,17 +58,26 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
                           "../res/shaders/simple.frag");
   shader->activate();
 
-  Mesh planetMesh = generateSphere(1.0, 40, 40);
+  Mesh planetMesh = generateSphere(planetRadius, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
+
+  Mesh atmosphereMesh = generateSphere(atmosphereRadius, 40, 40);
+  unsigned int atmosphereVAO = generateBuffer(atmosphereMesh);
 
   // Construct scene
   rootNode = createSceneNode();
   planetNode = createSceneNode();
+  SceneNode *atmosphereNode = createSceneNode();
 
   rootNode->children.push_back(planetNode);
+  rootNode->children.push_back(atmosphereNode);
 
   planetNode->vertexArrayObjectID = planetVAO;
   planetNode->VAOIndexCount = planetMesh.indices.size();
+
+  atmosphereNode->vertexArrayObjectID = atmosphereVAO;
+  atmosphereNode->VAOIndexCount = atmosphereMesh.indices.size();
+  atmosphereNode->scale = glm::vec3(1.25);
 
   camera = new Gloom::Camera(glm::vec3(0, 0, -10));
   camera->lookAt(planetNode->position);
@@ -138,6 +149,12 @@ void renderFrame(GLFWwindow *window) {
 
   glUniformMatrix4fv(shader->getUniformFromName("VP"), 1, GL_FALSE,
                      glm::value_ptr(VP));
+  glUniform3fv(shader->getUniformFromName("planetPosition"), 1,
+               glm::value_ptr(planetNode->position));
+  glUniform1f(shader->getUniformFromName("planetRadius"), planetRadius);
+  glUniform1f(shader->getUniformFromName("atmosphereRadius"), atmosphereRadius);
+  glUniform3fv(shader->getUniformFromName("cameraPosition"), 1,
+               glm::value_ptr(camera->getPosition()));
 
   renderNode(rootNode);
 }

@@ -142,6 +142,9 @@ public:
     return -glm::vec3(matView[0][2], matView[1][2], matView[2][2]);
   }
 
+  /* Get the camera's position */
+  glm::vec3 getPosition() { return cPosition; }
+
 private:
   // Disable copying and assignment
   Camera(Camera const &) = delete;
