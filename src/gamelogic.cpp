@@ -26,6 +26,8 @@ Gloom::Shader *shader;
 
 CommandLineOptions options;
 
+glm::mat4 VP;
+
 void cursorPosCallback(GLFWwindow *window, double x, double y) {
   int windowWidth, windowHeight;
   glfwGetWindowSize(window, &windowWidth, &windowHeight);
@@ -83,9 +85,9 @@ void updateFrame(GLFWwindow *window) {
 
   camera->updateCamera(deltaTime);
 
-  glm::mat4 VP = projection * camera->getViewMatrix();
+  VP = projection * camera->getViewMatrix();
 
-  updateNodeTransformations(rootNode, VP);
+  updateNodeTransformations(rootNode, glm::mat4(1.0f));
 }
 
 void updateNodeTransformations(SceneNode *node,
@@ -111,7 +113,7 @@ void updateNodeTransformations(SceneNode *node,
 }
 
 void renderNode(SceneNode *node) {
-  glUniformMatrix4fv(3, 1, GL_FALSE,
+  glUniformMatrix4fv(shader->getUniformFromName("M"), 1, GL_FALSE,
                      glm::value_ptr(node->currentTransformationMatrix));
 
   switch (node->nodeType) {
@@ -133,6 +135,9 @@ void renderFrame(GLFWwindow *window) {
   int windowWidth, windowHeight;
   glfwGetWindowSize(window, &windowWidth, &windowHeight);
   glViewport(0, 0, windowWidth, windowHeight);
+
+  glUniformMatrix4fv(shader->getUniformFromName("VP"), 1, GL_FALSE,
+                     glm::value_ptr(VP));
 
   renderNode(rootNode);
 }
