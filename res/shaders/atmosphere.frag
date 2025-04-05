@@ -11,7 +11,6 @@ uniform float atmosphereRadius;
 uniform vec3 planetPosition;
 uniform vec3 cameraPosition;
 uniform vec3 sunDirection;
-uniform bool isAtmosphere;
 
 const int nSAMPLES = 10;
 const float fSAMPLES = 10.0;
@@ -22,7 +21,7 @@ const float Kr = 0.0025f;
 const float Km = 0.0010f;
 const float ESun = 20.0f;
 const float g = -0.990f;
-const float scaleDepth = 0.2f;
+const float scaleDepth = 0.5f;
 
 float scale(float fCos)
 {
@@ -31,11 +30,6 @@ float scale(float fCos)
 }
 
 void main() {
-  if (!isAtmosphere) {
-    color = vec4(0.0, 1.0, 0.0, 1.0);
-    return;
-  }
-
   vec3 wavelength = vec3(0.650, 0.570, 0.475);
   vec3 invWaveLength = vec3(1.0 / pow(wavelength.x, 4), 1.0 / pow(wavelength.y, 4), 1.0 / pow(wavelength.z, 4));
 

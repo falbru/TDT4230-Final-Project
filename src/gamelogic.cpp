@@ -21,12 +21,13 @@ Gloom::Camera *camera;
 
 SceneNode *rootNode;
 SceneNode *planetNode;
-float planetRadius = 1.0;
-float atmosphereRadius = 1.25;
+float planetRadius = 10.0;
+float atmosphereRadius = 10.25;
 
 glm::vec3 sunDirection = glm::vec3(1, 0, 0);
 
-Gloom::Shader *shader;
+Gloom::Shader *geometryShader;
+Gloom::Shader *atmosphereShader;
 
 CommandLineOptions options;
 
@@ -55,10 +56,12 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
   glfwSetKeyCallback(window, keyCallback);
 
-  shader = new Gloom::Shader();
-  shader->makeBasicShader("../res/shaders/simple.vert",
-                          "../res/shaders/simple.frag");
-  shader->activate();
+  geometryShader = new Gloom::Shader();
+  geometryShader->makeBasicShader("../res/shaders/geometry.vert",
+                                  "../res/shaders/geometry.frag");
+  atmosphereShader = new Gloom::Shader();
+  atmosphereShader->makeBasicShader("../res/shaders/atmosphere.vert",
+                                    "../res/shaders/atmosphere.frag");
 
   Mesh planetMesh = generateSphere(planetRadius, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
@@ -82,7 +85,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   atmosphereNode->scale = glm::vec3(1.25);
   atmosphereNode->nodeType = SceneNodeType::ATMOSPHERE;
 
-  camera = new Gloom::Camera(glm::vec3(0, 0, -10));
+  camera = new Gloom::Camera(glm::vec3(0, 0, -20));
   camera->lookAt(planetNode->position);
 
   getTimeDeltaSeconds();
@@ -127,17 +130,23 @@ void updateNodeTransformations(SceneNode *node,
 }
 
 void renderNode(SceneNode *node) {
-  glUniformMatrix4fv(shader->getUniformFromName("M"), 1, GL_FALSE,
-                     glm::value_ptr(node->currentTransformationMatrix));
+  Gloom::Shader *shader;
 
   switch (node->nodeType) {
   case GEOMETRY:
+    shader = geometryShader;
     glCullFace(GL_BACK);
     break;
   case ATMOSPHERE:
+    shader = atmosphereShader;
     glCullFace(GL_FRONT);
     break;
   }
+
+  shader->activate();
+
+  glUniformMatrix4fv(shader->getUniformFromName("M"), 1, GL_FALSE,
+                     glm::value_ptr(node->currentTransformationMatrix));
 
   if (node->vertexArrayObjectID != -1) {
     glBindVertexArray(node->vertexArrayObjectID);
@@ -154,16 +163,22 @@ void renderFrame(GLFWwindow *window) {
   glfwGetWindowSize(window, &windowWidth, &windowHeight);
   glViewport(0, 0, windowWidth, windowHeight);
 
-  glUniformMatrix4fv(shader->getUniformFromName("VP"), 1, GL_FALSE,
-                     glm::value_ptr(VP));
-  glUniform3fv(shader->getUniformFromName("planetPosition"), 1,
-               glm::value_ptr(planetNode->position));
-  glUniform1f(shader->getUniformFromName("planetRadius"), planetRadius);
-  glUniform1f(shader->getUniformFromName("atmosphereRadius"), atmosphereRadius);
-  glUniform3fv(shader->getUniformFromName("cameraPosition"), 1,
-               glm::value_ptr(camera->getPosition()));
-  glUniform3fv(shader->getUniformFromName("sunDirection"), 1,
-               glm::value_ptr(sunDirection));
+  Gloom::Shader *shaders[2] = {geometryShader, atmosphereShader};
+
+  for (Gloom::Shader *shader : shaders) {
+    shader->activate();
+    glUniformMatrix4fv(shader->getUniformFromName("VP"), 1, GL_FALSE,
+                       glm::value_ptr(VP));
+    glUniform3fv(shader->getUniformFromName("planetPosition"), 1,
+                 glm::value_ptr(planetNode->position));
+    glUniform1f(shader->getUniformFromName("planetRadius"), planetRadius);
+    glUniform1f(shader->getUniformFromName("atmosphereRadius"),
+                atmosphereRadius);
+    glUniform3fv(shader->getUniformFromName("cameraPosition"), 1,
+                 glm::value_ptr(camera->getPosition()));
+    glUniform3fv(shader->getUniformFromName("sunDirection"), 1,
+                 glm::value_ptr(sunDirection));
+  }
 
   renderNode(rootNode);
 }
