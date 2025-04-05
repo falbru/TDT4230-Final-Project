@@ -17,21 +17,5 @@ float rand(vec2 co) {
 float dither(vec2 uv) { return (rand(uv) * 2.0 - 1.0) / 256.0; }
 
 void main() {
-  vec3 camToFrag = position.xyz - cameraPosition;
-  vec3 camToPlanet = planetPosition - cameraPosition;
-
-  vec3 rayDir = normalize(camToFrag);
-  float distAlongRay = dot(camToPlanet, rayDir);
-
-  vec3 projPoint = cameraPosition + rayDir * distAlongRay;
-
-  float planetDist = length(projPoint - planetPosition);
-  float atmosphereLength = atmosphereRadius - planetRadius;
-  float normalizedDist = min(1.0, (planetDist - planetRadius) / atmosphereLength);
-
-  if (normalizedDist > 0.0) {
-    color = vec4(1.0, 1.0, 1.0, exp(-5.0*normalizedDist));
-  }else {
-    color = vec4(0.5 * normal + 0.5, 1.0);
-  }
+  color = vec4(0.5 * normal + 0.5, 1.0);
 }

@@ -1,6 +1,7 @@
 // Local headers
 #include "program.hpp"
 #include "gamelogic.h"
+#include "glad/glad.h"
 #include "utilities/window.hpp"
 #include <glm/glm.hpp>
 // glm::translate, glm::rotate, glm::scale, glm::perspective

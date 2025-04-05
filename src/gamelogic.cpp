@@ -78,6 +78,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   atmosphereNode->vertexArrayObjectID = atmosphereVAO;
   atmosphereNode->VAOIndexCount = atmosphereMesh.indices.size();
   atmosphereNode->scale = glm::vec3(1.25);
+  atmosphereNode->nodeType = SceneNodeType::ATMOSPHERE;
 
   camera = new Gloom::Camera(glm::vec3(0, 0, -10));
   camera->lookAt(planetNode->position);
@@ -129,12 +130,16 @@ void renderNode(SceneNode *node) {
 
   switch (node->nodeType) {
   case GEOMETRY:
-    if (node->vertexArrayObjectID != -1) {
-      glBindVertexArray(node->vertexArrayObjectID);
-      glDrawElements(GL_TRIANGLES, node->VAOIndexCount, GL_UNSIGNED_INT,
-                     nullptr);
-    }
+    glCullFace(GL_BACK);
     break;
+  case ATMOSPHERE:
+    glCullFace(GL_FRONT);
+    break;
+  }
+
+  if (node->vertexArrayObjectID != -1) {
+    glBindVertexArray(node->vertexArrayObjectID);
+    glDrawElements(GL_TRIANGLES, node->VAOIndexCount, GL_UNSIGNED_INT, nullptr);
   }
 
   for (SceneNode *child : node->children) {
