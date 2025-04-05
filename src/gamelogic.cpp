@@ -24,6 +24,8 @@ SceneNode *planetNode;
 float planetRadius = 1.0;
 float atmosphereRadius = 1.25;
 
+glm::vec3 sunDirection = glm::vec3(1, 0, 0);
+
 Gloom::Shader *shader;
 
 CommandLineOptions options;
@@ -160,6 +162,8 @@ void renderFrame(GLFWwindow *window) {
   glUniform1f(shader->getUniformFromName("atmosphereRadius"), atmosphereRadius);
   glUniform3fv(shader->getUniformFromName("cameraPosition"), 1,
                glm::value_ptr(camera->getPosition()));
+  glUniform3fv(shader->getUniformFromName("sunDirection"), 1,
+               glm::value_ptr(sunDirection));
 
   renderNode(rootNode);
 }
