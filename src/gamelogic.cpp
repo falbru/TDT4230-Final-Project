@@ -21,10 +21,17 @@ Gloom::Camera *camera;
 
 SceneNode *rootNode;
 SceneNode *planetNode;
+
+const int SAMPLES = 10;
+const float Kr = 0.0025f;
+const float Km = 0.0010f;
+const float ESun = 20.0f;
+const float g = -0.990f;
+const float scaleDepth = 0.5f;
 float planetRadius = 10.0;
 float atmosphereRadius = 10.25;
-
-glm::vec3 sunDirection = glm::vec3(1, 0, 0);
+glm::vec3 waveLengths = glm::vec3(0.650f, 0.570f, 0.475f);
+glm::vec3 sunDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 
 Gloom::Shader *geometryShader;
 Gloom::Shader *atmosphereShader;
@@ -167,6 +174,15 @@ void renderFrame(GLFWwindow *window) {
 
   for (Gloom::Shader *shader : shaders) {
     shader->activate();
+
+    glUniform1i(shader->getUniformFromName("nSamples"), SAMPLES);
+    glUniform1f(shader->getUniformFromName("fSamples"), (float)SAMPLES);
+    glUniform1f(shader->getUniformFromName("Kr"), Kr);
+    glUniform1f(shader->getUniformFromName("Km"), Km);
+    glUniform1f(shader->getUniformFromName("ESun"), ESun);
+    glUniform1f(shader->getUniformFromName("g"), g);
+    glUniform1f(shader->getUniformFromName("scaleDepth"), scaleDepth);
+
     glUniformMatrix4fv(shader->getUniformFromName("VP"), 1, GL_FALSE,
                        glm::value_ptr(VP));
     glUniform3fv(shader->getUniformFromName("planetPosition"), 1,
@@ -178,6 +194,8 @@ void renderFrame(GLFWwindow *window) {
                  glm::value_ptr(camera->getPosition()));
     glUniform3fv(shader->getUniformFromName("sunDirection"), 1,
                  glm::value_ptr(sunDirection));
+    glUniform3fv(shader->getUniformFromName("waveLengths"), 1,
+                 glm::value_ptr(waveLengths));
   }
 
   renderNode(rootNode);

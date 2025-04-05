@@ -11,17 +11,16 @@ uniform float atmosphereRadius;
 uniform vec3 planetPosition;
 uniform vec3 cameraPosition;
 uniform vec3 sunDirection;
-
-const int nSAMPLES = 10;
-const float fSAMPLES = 10.0;
+uniform vec3 waveLengths;
+uniform int nSamples;
+uniform float fSamples;
+uniform float Kr;
+uniform float Km;
+uniform float ESun;
+uniform float g;
+uniform float scaleDepth;
 
 const float PI = 3.14159;
-
-const float Kr = 0.0025f;
-const float Km = 0.0010f;
-const float ESun = 20.0f;
-const float g = -0.990f;
-const float scaleDepth = 0.5f;
 
 float scale(float fCos)
 {
@@ -30,8 +29,7 @@ float scale(float fCos)
 }
 
 void main() {
-  vec3 wavelength = vec3(0.650, 0.570, 0.475);
-  vec3 invWaveLength = vec3(1.0 / pow(wavelength.x, 4), 1.0 / pow(wavelength.y, 4), 1.0 / pow(wavelength.z, 4));
+  vec3 invWaveLength = vec3(1.0 / pow(waveLengths.x, 4), 1.0 / pow(waveLengths.y, 4), 1.0 / pow(waveLengths.z, 4));
 
   float radiusScale = 1.0 / (atmosphereRadius - planetRadius);
   float scaleOverScaleDepth = radiusScale / scaleDepth;
@@ -53,13 +51,13 @@ void main() {
 	float startDepth = exp(-1.0 / scaleDepth);
 	float startOffset = startDepth*scale(startAngle);
 
-  float sampleLength = far / fSAMPLES;
+  float sampleLength = far / fSamples;
   float scaledLength = sampleLength * radiusScale;
   vec3 sampleRay = ray * sampleLength;
   vec3 samplePoint = start + sampleRay * 0.5;
 
   vec3 frontColor = vec3(0.0, 0.0, 0.0);
-  for (int i = 0; i < nSAMPLES; i++) {
+  for (int i = 0; i < nSamples; i++) {
     float height = length(samplePoint - planetPosition);
     float depth = exp(scaleOverScaleDepth * (planetRadius - height));
     float sunAngle = dot(sunDirection, samplePoint) / height;
@@ -75,6 +73,8 @@ void main() {
 	float fCos = dot(sunDirection, toCamera) / length(toCamera);
 	float fMiePhase = 1.5 * ((1.0 - g*g) / (2.0 + g*g)) * (1.0 + fCos*fCos) / pow(1.0 + g*g - 2.0*g*fCos, 1.5);
 
-  color.rgb = (frontColor * invWaveLength * Kr * ESun) + fMiePhase * (frontColor * Km * ESun);
+  vec3 primaryColor = (frontColor * invWaveLength * Kr * ESun); 
+  vec3 secondaryColor = (frontColor * Km * ESun); 
+  color.rgb = primaryColor + fMiePhase * secondaryColor;
 	color.a = color.b;
 }
