@@ -76,5 +76,5 @@ void main() {
   vec3 primaryColor = (frontColor * invWaveLength * Kr * ESun);
   vec3 secondaryColor = (frontColor * Km * ESun);
   color.rgb = primaryColor + fMiePhase * secondaryColor;
-	color.a = color.b;
+	color.a = max(color.r, max(color.g, color.b));
 }

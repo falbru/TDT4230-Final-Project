@@ -26,7 +26,7 @@ const int SAMPLES = 10;
 const float Kr = 0.0025f;
 const float Km = 0.0010f;
 const float ESun = 20.0f;
-const float g = 0;
+const float g = -0.5f;
 const float scaleDepth = 0.5f;
 float planetRadius = 10.0;
 float atmosphereRadius = 10.25;
@@ -96,7 +96,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   atmosphereNode->VAOIndexCount = atmosphereMesh.indices.size();
   atmosphereNode->nodeType = SceneNodeType::ATMOSPHERE;
 
-  camera = new Gloom::Camera(glm::vec3(0, 0, -20));
+  camera = new Gloom::Camera(glm::vec3(0, 0, -atmosphereRadius - 0.001f));
   camera->lookAt(planetNode->position);
 
   getTimeDeltaSeconds();
@@ -110,8 +110,8 @@ void updateFrame(GLFWwindow *window) {
   static double time = 0.0;
   time += deltaTime;
 
-  sunDirection.x = cos(time * 0.1);
-  sunDirection.z = sin(time * 0.1);
+  sunDirection.x = cos(time);
+  sunDirection.z = sin(time);
 
   glm::mat4 projection =
       glm::perspective(glm::radians(80.0f),
