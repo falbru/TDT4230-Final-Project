@@ -26,7 +26,7 @@ const int SAMPLES = 10;
 const float Kr = 0.0025f;
 const float Km = 0.0010f;
 const float ESun = 20.0f;
-const float g = -0.990f;
+const float g = 0;
 const float scaleDepth = 0.5f;
 float planetRadius = 10.0;
 float atmosphereRadius = 10.25;
@@ -34,7 +34,8 @@ glm::vec3 waveLengths = glm::vec3(0.650f, 0.570f, 0.475f);
 glm::vec3 sunDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 
 Gloom::Shader *geometryShader;
-Gloom::Shader *atmosphereShader;
+Gloom::Shader *skyFromSpaceShader;
+Gloom::Shader *skyFromAtmosphereShader;
 
 CommandLineOptions options;
 
@@ -66,9 +67,13 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   geometryShader = new Gloom::Shader();
   geometryShader->makeBasicShader("../res/shaders/geometry.vert",
                                   "../res/shaders/geometry.frag");
-  atmosphereShader = new Gloom::Shader();
-  atmosphereShader->makeBasicShader("../res/shaders/atmosphere.vert",
-                                    "../res/shaders/atmosphere.frag");
+  skyFromSpaceShader = new Gloom::Shader();
+  skyFromSpaceShader->makeBasicShader("../res/shaders/skyFromSpace.vert",
+                                      "../res/shaders/skyFromSpace.frag");
+  skyFromAtmosphereShader = new Gloom::Shader();
+  skyFromAtmosphereShader->makeBasicShader(
+      "../res/shaders/skyFromAtmosphere.vert",
+      "../res/shaders/skyFromAtmosphere.frag");
 
   Mesh planetMesh = generateSphere(planetRadius, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
@@ -89,7 +94,6 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
 
   atmosphereNode->vertexArrayObjectID = atmosphereVAO;
   atmosphereNode->VAOIndexCount = atmosphereMesh.indices.size();
-  atmosphereNode->scale = glm::vec3(1.25);
   atmosphereNode->nodeType = SceneNodeType::ATMOSPHERE;
 
   camera = new Gloom::Camera(glm::vec3(0, 0, -20));
@@ -102,6 +106,12 @@ void updateFrame(GLFWwindow *window) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   double deltaTime = getTimeDeltaSeconds();
+
+  static double time = 0.0;
+  time += deltaTime;
+
+  sunDirection.x = cos(time * 0.1);
+  sunDirection.z = sin(time * 0.1);
 
   glm::mat4 projection =
       glm::perspective(glm::radians(80.0f),
@@ -145,7 +155,9 @@ void renderNode(SceneNode *node) {
     glCullFace(GL_BACK);
     break;
   case ATMOSPHERE:
-    shader = atmosphereShader;
+    shader = (glm::length(camera->getPosition()) > atmosphereRadius)
+                 ? skyFromSpaceShader
+                 : skyFromAtmosphereShader;
     glCullFace(GL_FRONT);
     break;
   }
@@ -170,7 +182,8 @@ void renderFrame(GLFWwindow *window) {
   glfwGetWindowSize(window, &windowWidth, &windowHeight);
   glViewport(0, 0, windowWidth, windowHeight);
 
-  Gloom::Shader *shaders[2] = {geometryShader, atmosphereShader};
+  Gloom::Shader *shaders[3] = {geometryShader, skyFromSpaceShader,
+                               skyFromAtmosphereShader};
 
   for (Gloom::Shader *shader : shaders) {
     shader->activate();

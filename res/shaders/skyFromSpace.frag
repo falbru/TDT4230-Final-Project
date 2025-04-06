@@ -73,8 +73,8 @@ void main() {
 	float fCos = dot(sunDirection, toCamera) / length(toCamera);
 	float fMiePhase = 1.5 * ((1.0 - g*g) / (2.0 + g*g)) * (1.0 + fCos*fCos) / pow(1.0 + g*g - 2.0*g*fCos, 1.5);
 
-  vec3 primaryColor = (frontColor * invWaveLength * Kr * ESun); 
-  vec3 secondaryColor = (frontColor * Km * ESun); 
+  vec3 primaryColor = (frontColor * invWaveLength * Kr * ESun);
+  vec3 secondaryColor = (frontColor * Km * ESun);
   color.rgb = primaryColor + fMiePhase * secondaryColor;
 	color.a = color.b;
 }
