@@ -1,6 +1,7 @@
 #version 430 core
 
 in layout(location = 0) vec4 position;
+in layout(location = 1) vec2 textureCoordinates;
 
 out vec4 color;
 
@@ -19,6 +20,8 @@ uniform float g;
 uniform float scaleDepth;
 
 const float PI = 3.14159;
+
+layout(binding = 0) uniform sampler2D sampler;
 
 float scale(float fCos)
 {
@@ -74,6 +77,12 @@ void main() {
   vec3 primaryColor = frontColor * (invWaveLength * Kr * ESun + Km*ESun);
   vec3 secondaryColor = attenuate;
 
-  color.rgb = primaryColor + 0.25 * secondaryColor;
-  color.a = 1.0f;
+  // color.rgb = primaryColor + 0.25 * secondaryColor;
+  // vec3 scatteringColor = primaryColor + 0.25 * secondaryColor;
+  // scatteringColor.r = min(1.0, scatteringColor.r);
+  // scatteringColor.g = min(1.0, scatteringColor.g);
+  // scatteringColor.b = min(1.0, scatteringColor.b);
+  color = texture(sampler, textureCoordinates);
+  // color.rgb = color.rgb * secondaryColor;
+  // color.rgb += primaryColor;
 }

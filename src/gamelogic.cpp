@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "sceneGraph.hpp"
 #include "utilities/camera.hpp"
+#include "utilities/imageLoader.hpp"
 #include <GLFW/glfw3.h>
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
@@ -65,6 +66,19 @@ void keyCallback(GLFWwindow *, int key, int, int action, int) {
   camera->handleKeyboardInputs(key, action);
 }
 
+unsigned int genTexture(const PNGImage &img) {
+  unsigned int textureId;
+  glGenTextures(1, &textureId);
+  glBindTexture(GL_TEXTURE_2D, textureId);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, img.pixels.data());
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  return textureId;
+}
+
 void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   glfwSetCursorPosCallback(window, cursorPosCallback);
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -80,6 +94,8 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   skyFromAtmosphereShader->makeBasicShader(
       "../res/shaders/skyFromAtmosphere.vert",
       "../res/shaders/skyFromAtmosphere.frag");
+
+  int earthTextureID = genTexture(loadPNGFile("../res/textures/earth.png"));
 
   Mesh planetMesh = generateSphere(planetRadius, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
@@ -97,6 +113,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
 
   planetNode->vertexArrayObjectID = planetVAO;
   planetNode->VAOIndexCount = planetMesh.indices.size();
+  planetNode->textureID = earthTextureID;
 
   atmosphereNode->vertexArrayObjectID = atmosphereVAO;
   atmosphereNode->VAOIndexCount = atmosphereMesh.indices.size();
@@ -149,6 +166,7 @@ void renderNode(SceneNode *node) {
 
   switch (node->nodeType) {
   case GEOMETRY:
+    glBindTexture(0, node->textureID);
     shader = geometryShader;
     glCullFace(GL_BACK);
     break;

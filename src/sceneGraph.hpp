@@ -50,6 +50,8 @@ struct SceneNode {
   int vertexArrayObjectID;
   unsigned int VAOIndexCount;
 
+  unsigned int textureID;
+
   // Node type is used to determine how to handle the contents of a node
   SceneNodeType nodeType;
 };
