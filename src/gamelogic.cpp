@@ -96,7 +96,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   atmosphereNode->VAOIndexCount = atmosphereMesh.indices.size();
   atmosphereNode->nodeType = SceneNodeType::ATMOSPHERE;
 
-  camera = new Gloom::Camera(glm::vec3(0, 0, -atmosphereRadius - 0.001f));
+  camera = new Gloom::Camera(glm::vec3(0, 0, -20));
   camera->lookAt(planetNode->position);
 
   getTimeDeltaSeconds();
@@ -106,12 +106,6 @@ void updateFrame(GLFWwindow *window) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   double deltaTime = getTimeDeltaSeconds();
-
-  static double time = 0.0;
-  time += deltaTime;
-
-  sunDirection.x = cos(time);
-  sunDirection.z = sin(time);
 
   glm::mat4 projection =
       glm::perspective(glm::radians(80.0f),
