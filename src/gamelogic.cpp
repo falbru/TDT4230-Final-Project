@@ -97,7 +97,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
 
   int earthTextureID = genTexture(loadPNGFile("../res/textures/earth.png"));
 
-  Mesh planetMesh = generateSphere(planetRadius, 40, 40);
+  Mesh planetMesh = generateSphere(planetRadius, 100, 100);
   unsigned int planetVAO = generateBuffer(planetMesh);
 
   Mesh atmosphereMesh = generateSphere(planetRadius, 40, 40);

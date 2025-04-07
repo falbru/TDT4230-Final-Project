@@ -30,7 +30,6 @@ float scale(float fCos)
 }
 
 void main() {
-
   vec3 invWaveLength = vec3(1.0 / pow(waveLengths.x, 4), 1.0 / pow(waveLengths.y, 4), 1.0 / pow(waveLengths.z, 4));
 
   float radiusScale = 1.0 / (atmosphereRadius - planetRadius);
@@ -77,12 +76,12 @@ void main() {
   vec3 primaryColor = frontColor * (invWaveLength * Kr * ESun + Km*ESun);
   vec3 secondaryColor = attenuate;
 
-  // color.rgb = primaryColor + 0.25 * secondaryColor;
   // vec3 scatteringColor = primaryColor + 0.25 * secondaryColor;
   // scatteringColor.r = min(1.0, scatteringColor.r);
   // scatteringColor.g = min(1.0, scatteringColor.g);
   // scatteringColor.b = min(1.0, scatteringColor.b);
   color = texture(sampler, textureCoordinates);
-  // color.rgb = color.rgb * secondaryColor;
-  // color.rgb += primaryColor;
+  color.rgb = color.rgb * secondaryColor * 0.1;
+  color.rgb += primaryColor * 0.01;
+  color.a = 1.0f;
 }
