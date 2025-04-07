@@ -16,19 +16,23 @@
 #include <utilities/shapes.h>
 #include <utilities/timeutils.h>
 #define GLM_ENABLE_EXPERIMENTAL
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include <glm/gtx/transform.hpp>
 
 Gloom::Camera *camera;
 
 SceneNode *rootNode;
 SceneNode *planetNode;
+SceneNode *atmosphereNode;
 
 const int SAMPLES = 10;
-const float Kr = 0.0025f;
-const float Km = 0.0010f;
-const float ESun = 20.0f;
-const float g = -0.5f;
-const float scaleDepth = 0.5f;
+float Kr = 0.0025f;
+float Km = 0.0010f;
+float ESun = 20.0f;
+float g = -0.5f;
+float scaleDepth = 0.5f;
 float planetRadius = 10.0;
 float atmosphereRadius = 10.25;
 glm::vec3 waveLengths = glm::vec3(0.650f, 0.570f, 0.475f);
@@ -57,9 +61,14 @@ void mouseButtonCallback(GLFWwindow *, int button, int action, int) {
   camera->handleMouseButtonInputs(button, action == GLFW_PRESS);
 }
 
+void keyCallback(GLFWwindow *, int key, int, int action, int) {
+  camera->handleKeyboardInputs(key, action);
+}
+
 void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   glfwSetCursorPosCallback(window, cursorPosCallback);
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
+  glfwSetKeyCallback(window, keyCallback);
 
   geometryShader = new Gloom::Shader();
   geometryShader->makeBasicShader("../res/shaders/geometry.vert",
@@ -75,13 +84,13 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   Mesh planetMesh = generateSphere(planetRadius, 40, 40);
   unsigned int planetVAO = generateBuffer(planetMesh);
 
-  Mesh atmosphereMesh = generateSphere(atmosphereRadius, 40, 40);
+  Mesh atmosphereMesh = generateSphere(planetRadius, 40, 40);
   unsigned int atmosphereVAO = generateBuffer(atmosphereMesh);
 
   // Construct scene
   rootNode = createSceneNode();
   planetNode = createSceneNode();
-  SceneNode *atmosphereNode = createSceneNode();
+  atmosphereNode = createSceneNode();
 
   rootNode->children.push_back(planetNode);
   rootNode->children.push_back(atmosphereNode);
@@ -170,6 +179,25 @@ void renderFrame(GLFWwindow *window) {
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
   glViewport(0, 0, windowWidth, windowHeight);
+
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  {
+    ImGui::Begin("Hello, world!");
+
+    ImGui::Text("This is some useful text.");
+
+    ImGui::SliderFloat("Kr", &Kr, 0.0f, 0.005f);
+    ImGui::SliderFloat("Km", &Km, 0.0f, 0.005f);
+    ImGui::SliderFloat("ESun", &ESun, 0.0f, 50.0f);
+    ImGui::SliderFloat("g", &g, -1.0f, 1.0f);
+    ImGui::SliderFloat("Scale Depth", &scaleDepth, 0.0f, 1.0f);
+    ImGui::SliderFloat("atmosphere Depth", &atmosphereRadius, planetRadius,
+                       planetRadius + 2.0f);
+    ImGui::End();
+  }
+  atmosphereNode->scale = glm::vec3(atmosphereRadius / planetRadius);
 
   Gloom::Shader *shaders[3] = {geometryShader, skyFromSpaceShader,
                                skyFromAtmosphereShader};

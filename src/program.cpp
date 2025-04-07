@@ -56,11 +56,6 @@ void runProgram(GLFWwindow *window, CommandLineOptions options) {
     glfwPollEvents();
     handleKeyboardInput(window);
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ImGui::ShowDemoWindow(); // Show demo window! :)
-
     updateFrame(window);
     renderFrame(window);
 
