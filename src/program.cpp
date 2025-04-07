@@ -9,11 +9,14 @@
 #include <SFML/System/Time.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include <utilities/glutils.h>
 #include <utilities/shader.hpp>
 #include <utilities/shapes.h>
 #include <utilities/timeutils.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 void runProgram(GLFWwindow *window, CommandLineOptions options) {
   // Enable depth (Z) buffer (accept "closest" fragment)
@@ -33,6 +36,15 @@ void runProgram(GLFWwindow *window, CommandLineOptions options) {
   // Set default colour after clearing the colour buffer
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+  // Setup Dear ImGui
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  io.Fonts->AddFontFromFileTTF("../res/Inter.ttf", 20);
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init();
+
   initGame(window, options);
 
   // Rendering Loop
@@ -40,12 +52,20 @@ void runProgram(GLFWwindow *window, CommandLineOptions options) {
     // Clear colour and depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    updateFrame(window);
-    renderFrame(window);
-
     // Handle other events
     glfwPollEvents();
     handleKeyboardInput(window);
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow(); // Show demo window! :)
+
+    updateFrame(window);
+    renderFrame(window);
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Flip buffers
     glfwSwapBuffers(window);

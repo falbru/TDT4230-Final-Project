@@ -78,6 +78,12 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include)
 endif()
 
 #
+# IMGUI
+#
+file(GLOB IMGUI_SOURCES lib/imgui/*.cpp lib/imgui/backends/imgui_impl_glfw.cpp lib/imgui/backends/imgui_impl_opengl3.cpp)
+file(GLOB IMGUI_HEADERS lib/imgui/*.h lib/imgui/backends/imgui_impl_glfw.h lib/imgui/backends/imgui_impl_opengl3.h)
+
+#
 # Set include paths
 #
 include_directories (src/
@@ -87,6 +93,8 @@ include_directories (src/
                      lib/glm/
                      lib/stb/
                      lib/arrrgh/
+                     lib/imgui/
+                     lib/imgui/backends
                      lib/SFML/include/)
 
 
@@ -94,7 +102,9 @@ include_directories (src/
 # Add files
 #
 file (GLOB         VENDORS_SOURCES lib/glad/src/glad.c
-								   lib/lodepng/lodepng.cpp)
+								   lib/lodepng/lodepng.cpp
+                   ${IMGUI_SOURCES}
+                   ${IMGUI_HEADERS})
 file (GLOB_RECURSE PROJECT_HEADERS src/*.hpp
                                    src/*.h)
 file (GLOB_RECURSE PROJECT_SOURCES src/*.cpp

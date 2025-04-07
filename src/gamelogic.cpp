@@ -1,4 +1,5 @@
 #include "gamelogic.h"
+#include "imgui.h"
 #include "sceneGraph.hpp"
 #include "utilities/camera.hpp"
 #include <GLFW/glfw3.h>
@@ -46,23 +47,19 @@ void cursorPosCallback(GLFWwindow *window, double x, double y) {
   glfwGetWindowSize(window, &windowWidth, &windowHeight);
   glViewport(0, 0, windowWidth, windowHeight);
 
-  camera->handleCursorPosInput(x, y);
+  ImGuiIO &io = ImGui::GetIO();
+  io.AddMousePosEvent(x, y);
 }
 
 void mouseButtonCallback(GLFWwindow *, int button, int action, int) {
-  camera->handleMouseButtonInputs(button, action);
-}
-
-void keyCallback(GLFWwindow *, int key, int, int action, int) {
-  camera->handleKeyboardInputs(key, action);
+  ImGuiIO &io = ImGui::GetIO();
+  io.AddMouseButtonEvent(button, action);
+  camera->handleMouseButtonInputs(button, action == GLFW_PRESS);
 }
 
 void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
   glfwSetCursorPosCallback(window, cursorPosCallback);
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
-  glfwSetKeyCallback(window, keyCallback);
 
   geometryShader = new Gloom::Shader();
   geometryShader->makeBasicShader("../res/shaders/geometry.vert",
@@ -102,9 +99,7 @@ void initGame(GLFWwindow *window, CommandLineOptions gameOptions) {
   getTimeDeltaSeconds();
 }
 
-void updateFrame(GLFWwindow *window) {
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+void updateFrame(GLFWwindow *) {
   double deltaTime = getTimeDeltaSeconds();
 
   glm::mat4 projection =
@@ -173,7 +168,7 @@ void renderNode(SceneNode *node) {
 
 void renderFrame(GLFWwindow *window) {
   int windowWidth, windowHeight;
-  glfwGetWindowSize(window, &windowWidth, &windowHeight);
+  glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
   glViewport(0, 0, windowWidth, windowHeight);
 
   Gloom::Shader *shaders[3] = {geometryShader, skyFromSpaceShader,
